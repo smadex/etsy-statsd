@@ -23,7 +23,7 @@ var writeconfig = function(text,worker,cb,obj){
 };
 
 var statsd_send = function(data,sock,host,port,cb){
-  send_data = new Buffer(data);
+  send_data = Buffer.from(data);
   sock.send(send_data,0,send_data.length,port,host,function(err,bytes){
     if (err) {
       throw err;
@@ -36,7 +36,7 @@ var statsd_send = function(data,sock,host,port,cb){
 // this will let us capture all data chunks so we don't miss one
 var collect_for = function(server,timeout,cb){
   // We have binary data arriving over the wire. Avoid strings.
-  var received = new Buffer(0);
+  var received = Buffer.alloc(0);
   var in_flight = 0;
   var timed_out = false;
   var collector = function(req,res){
@@ -66,7 +66,7 @@ var collect_for = function(server,timeout,cb){
 // wire protocol into JSON written to stdout.
 var script =
   "import sys\n" +
-  "import cPickle\n" +
+  "import pickle\n" +
   "import struct\n" +
   "import json\n" +
   "payload = open(sys.argv[1], 'rb').read()\n" +
@@ -74,8 +74,8 @@ var script =
   "header_length = struct.calcsize(pack_format)\n" +
   "payload_length, = struct.unpack(pack_format, payload[:header_length])\n" +
   "batch_length = header_length + payload_length\n" +
-  "metrics = cPickle.loads(payload[header_length:batch_length])\n" +
-  "print json.dumps(metrics)\n";
+  "metrics = pickle.loads(payload[header_length:batch_length])\n" +
+  "print(json.dumps(metrics))\n";
 
 // Write our binary payload and unpickling script to disk
 // then process the unserialized results.
@@ -95,7 +95,7 @@ var unpickle = function(payload, cb) {
         fs.close(unpickle_info.fd, function(err) {
           if (err) throw err;
 
-          var cmd = 'python ' + unpickle_info.path + ' ' + payload_info.path;
+          var cmd = 'python3 ' + unpickle_info.path + ' ' + payload_info.path;
           var python = cp.exec(cmd, function(err, stdout, stderr) {
             if (err) throw err;
             var metrics = JSON.parse(stdout);

@@ -76,9 +76,7 @@ Optional Variables:
                     output [true or false, default: true]
 
   log:              log settings [object, default: undefined]
-    backend:        where to log: stdout or syslog [string, default: stdout]
-    application:    name of the application for syslog [string, default: statsd]
-    level:          log level for [node-]syslog [string, default: LOG_INFO]
+    backend:        where to log, only stdout is supported [string, default: stdout]
 
   graphite:
     legacyNamespace:  use the legacy namespace [default: true]
